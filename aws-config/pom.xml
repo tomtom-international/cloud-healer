@@ -20,8 +20,8 @@
 
     <parent>
         <groupId>com.tomtom.cloud</groupId>
-        <artifactId>instance-recycler</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <artifactId>cloud-healer</artifactId>
+        <version>1.0.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>aws-recycling-config</artifactId>
