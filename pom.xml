@@ -25,6 +25,34 @@
     <description>Enables Unhealthy Instance Recycling</description>
     <name>Instance Recycler</name>
 
+    <organization>
+        <name>TomTom International BV</name>
+        <url>http://tomtom.com</url>
+    </organization>
+
+    <developers>
+        <developer>
+            <id>romanovf</id>
+            <name>Fedor Romanov</name>
+            <email>fedor.romanov@tomtom.com</email>
+            <organization>TomTom</organization>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses>
+
+    <url>http://tomtom.com</url>
+    <scm>
+        <url>https://github.com/tomtom-international/cloud-healer</url>
+    </scm>
+
     <modules>
         <module>recycling-common</module>
         <module>aws-recycling</module>

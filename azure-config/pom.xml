@@ -24,7 +24,7 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>azure-monitoring-config</artifactId>
+    <artifactId>azure-recycling-config</artifactId>
     <packaging>jar</packaging>
     <name>Azure Recycling Configuration</name>
 

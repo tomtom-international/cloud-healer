@@ -24,7 +24,7 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>aws-monitoring-config</artifactId>
+    <artifactId>aws-recycling-config</artifactId>
     <packaging>jar</packaging>
     <name>AWS Recycling Configuration</name>
 
