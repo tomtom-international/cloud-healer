@@ -36,12 +36,12 @@ import com.tomtom.cloud.recycling.aws.sns.AwsShutdownAdvisedNotifier;
 
 
 /**
- * Configuration class for AWS monitoring.
+ * Configuration class for AWS recycling.
  */
 @ConditionalOnProperty(name="cloud.aws.enabled", havingValue="true")
 @Configuration
 @EnableConfigurationProperties(AwsProperties.class)
-public class AwsMonitoringAutoConfig {
+public class AwsRecyclingAutoConfig {
 
     @Bean
     public AmazonCloudWatchClient acwClient(final AwsProperties properties) {

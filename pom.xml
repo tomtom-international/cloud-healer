@@ -22,8 +22,8 @@
     <version>1.0.1-SNAPSHOT</version>
 
     <packaging>pom</packaging>
-    <description>Enables Unhealthy Instance Recycling</description>
-    <name>Instance Recycler</name>
+    <description>Enables graceful cloud-agnostic VM self-recycling</description>
+    <name>Graceful Self Recycler</name>
 
     <organization>
         <name>TomTom International BV</name>

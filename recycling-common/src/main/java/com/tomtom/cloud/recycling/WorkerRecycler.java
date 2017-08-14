@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * NavKit Worker recycler.
+ * VM Recycler.
  */
 public class WorkerRecycler {
 
@@ -36,10 +36,8 @@ public class WorkerRecycler {
         this.cloudAdapter = cloudAdapter;
     }
 
-
-
     /**
-     * This method is only meant to be called once and to eventually cause the worker to be recycled
+     * This method is only meant to be called once and to eventually cause the instance to be recycled
      * (terminated and replaced with a new instance).
      */
     public synchronized void recycle() {

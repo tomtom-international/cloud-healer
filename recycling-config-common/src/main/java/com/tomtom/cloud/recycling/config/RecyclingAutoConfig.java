@@ -26,11 +26,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Autoconfiguration for cloud monitoring.
+ * Autoconfiguration for cloud recycling.
  */
 @ConditionalOnExpression("'${cloud.aws.enabled}'=='true' or '${cloud.azure.enabled}'=='true'")
 @Configuration
-public class MonitoringAutoConfig {
+public class RecyclingAutoConfig {
     private static final long DEFAULT_SLEEP_TIME_SECONDS = 60;
 
     @Value("${cloud.monitoring.sleep:" + DEFAULT_SLEEP_TIME_SECONDS + "}")

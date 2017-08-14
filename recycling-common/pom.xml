@@ -26,7 +26,7 @@
 
     <artifactId>recycling-common</artifactId>
     <packaging>jar</packaging>
-    <name>Common Classes For Node Recycling</name>
+    <name>Common Classes For VM Graceful Node Self-Recycling</name>
     <properties>
         <!-- define coverage ratios used during jacoco-maven-plugin:check -->
         <jacoco.check.branchRatio>0.10</jacoco.check.branchRatio>

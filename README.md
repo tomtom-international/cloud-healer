@@ -5,5 +5,165 @@
  
 **Copyright (C) 2012-2017, TomTom International BV. All rights reserved.**
 
-# cloud-healer
-TomTom Cloud Healer enables cloud-agnostic self-managed instance recycling for Java. 
+## Introduction
+TomTom VM Self Recycler enables cloud-agnostic self-managed instance recycling for Java. This component was developed to 
+ address following unique operational requirements:
+  * Your computing instance can inter error state, e.g. connectivity to external resources(process, DB, message queues, e.t.c.) is lost.
+The error state can occure unpredictable and can not be scheduled.
+  * Restarting instance most likely solves the issue
+  * Instance restarting takes substantial amount of time, e.g. several GBs needs to be copied
+  * Load-Balancer(LB) does not support automatic VM recovery(Azure)
+  
+## Why standard LB can't fix this?
+Relying on LB to detect and recycle instance is _passive_ approach. LB expect predefined number of consecutive health
+check failures for VM to become unhealthy. E.g. By default, Azure LB executes health check every 15 sec, 3 consecutive health
+check must be failed for instance to remove it from LB. Performance degradation could be caused by prompt removal of the instance from the cluster.
+Following pictures depict how LB handles node failure
+
+                               +---------------+
+     CLIENTS ->                | Load Balancer |
+                               +---------------+
+                                     /  \               
+                      +-------------+    +------------------+
+     VM               | "Node1"     |    | "Node2"          |
+     LEVEL            | Status:OK   |    |  Status:OK       |
+                      +-------------+    +------------------+
+                      /                               \
+              +------------+                      +------------------+      
+     EXTERNAL | "Node 1"   |                      | "Node 2"         |      
+     RESOURCE | Dependency |                      | Dependency       |
+              +------------+                      +------------------+
+
+Now _Node 2_ loses connectivity to external resource and enters error internal state:
+
+                               +---------------+
+     CLIENTS ->                | Load Balancer |
+                               +---------------+
+                                     /  \               
+                      +-------------+    +------------------+
+     VM               | "Node 1"    |    | "Node 2"         |
+     LEVEL            | Status:OK   |    |  Status:ERROR    |
+                      +-------------+    +------------------+
+                      /                               
+              +------------+                      +------------------+      
+     EXTERNAL | "Node 1    |                      | "Node 2"         |      
+     RESOURCE | Dependency |                      | Dependency       |
+              +------------+                      +------------------+
+After some time LB detects _Node 2_ failure, removes it from cluster and, if supported by cloud provider, spins off new one.
+Notice that during that period only _Node 1_ serves all requests which could cause 'snowball' effect on overall system performance:
+
+                                  +---------------+
+    CLIENTS(can see degradation)->| Load Balancer |
+                                  +---------------+
+                                     /                 
+                      +-------------+    +------------------+
+     VM               | "Node 1"    |    | "Node 3"         |
+     LEVEL            | Status:OK   |    |  Status:STARTING |
+                      +-------------+    +------------------+
+                      /                               
+              +------------+                      +------------------+      
+     EXTERNAL | "Node 1"   |                      | "Node 3"         |      
+     RESOURCE | Dependency |                      | Dependency       |
+              +------------+                      +------------------+      
+When _Node 3_ is ready(could take up to several minutes) LB adds it to the cluster and starts routing traffic to it:
+
+                               +---------------+
+     CLIENTS(back to normal)-> | Load Balancer |
+                               +---------------+
+                                     /  \               
+                      +-------------+    +------------------+
+     VM               | "Node 1"    |    | "Node 3"         |
+     LEVEL            | Status:OK   |    |  Status:OK       |
+                      +-------------+    +------------------+
+                      /                               \
+              +------------+                      +------------------+      
+     EXTERNAL | "Node 1"   |                      | "Node 3"         |      
+     RESOURCE | Dependency |                      | Dependency       |
+              +------------+                      +------------------+
+## How VM Self Recycler addresses this case
+Instead of taking _passive_ approach, VM Self-Recycler empowers node to function _proctively_, i.e. immidietly
+after expiriencing failure start new nodes(double number of instances) and terminate itself only when new nodes are up and running:
+_Node 2_ loses connectivity to external resource and enters error internal state. VM Self-Recycler start new instance :
+
+                               +---------------+
+     CLIENTS ->                | Load Balancer |
+                               +---------------+
+                                     /  \               
+                      +-------------+    +------------------+               +------------------+  
+     VM               | "Node 1"    |    | "Node 2"         |               | "Node 3:         |
+     LEVEL            | Status:OK   |    |  Status:OK       |---create- ->  | Status:STARTING  |
+                      +-------------+    +------------------+               +------------------+
+                      /                                                              \
+              +------------+                      +------------------+         +------------------+ 
+     EXTERNAL | "Node 1    |                      | "Node 2"         |         | "Node 3"         |
+     RESOURCE | Dependency |                      | Dependency       |         | Dependency       |
+              +------------+                      +------------------+         +------------------+
+When _Node 3_ is up and running VM Self-Recycler replaces it LB and triggers _Node 2_ self-termination: 
+
+                               +---------------+
+     CLIENTS ->                | Load Balancer |
+                               +---------------+
+                                     /  \               
+                      +-------------+    +------------------+               +-------------------+  <---------|
+     VM               | "Node 1"    |    | "Node 3"         |               | "Node 2:          |            |
+     LEVEL            | Status:OK   |    |  Status:OK       |               | Status:TERMINATING|->terminate-|
+                      +-------------+    +------------------+               +-------------------+
+                      /                              \                                
+              +------------+                      +------------------+         +------------------+ 
+     EXTERNAL | "Node 1    |                      | "Node 3"         |         | "Node 2"         |
+     RESOURCE | Dependency |                      | Dependency       |         | Dependency       |
+              +------------+                      +------------------+         +------------------+
+## Build Environment (Java 8)
+
+The source uses Java JDK 1.8, so make sure your Java compiler is set to 1.8, for example
+using something like (MacOSX):
+
+    export JAVA_HOME=`/usr/libexec/java_home -v 1.8`
+
+## Build
+
+To build the VM self-recycler, simply go to the root folder and then type:
+
+    mvn clean install
+
+or, to view the test coverage, execute:
+
+    mvn clean verify jacoco:report
+    open target/site/jacoco/index.html
+## Organization of Source Code
+
+    cloud-healer
+    |
+    +-- recycling-config-common
+    |   |
+    |   +-- RecyclingAutoConfig Autoconfiguration for cloud instance self-recycling
+    |
+    +-- recycling-common
+    |  |
+    |  +-- WorkerRecycler          Facade for interacting with node self recycler.
+    |  +-- WorkerRecyclerThread    Thread for triggering the recycling of the current instance
+    |  +-- CloudAdapter            Interface to be implemented for direct interactions with cloud provider (E.g: AWS or azure).
+    |                           
+    +-- azure-recycling            Azure-specific recycling implementation
+    |  +-- AzureCloudAdapter       
+    |  
+    +-- azure-config              Azure-specific recycling configuration 
+    |  +-- AzureMonitoringAutoConfig       
+    |
+    +-- aws-recycling              AWS-specific recycling implementation
+    |  
+    +-- aws-config                 AWS-specific recycling configuration
+    |  +-- AwsRecyclingAutoConfig       
+# License
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
