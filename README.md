@@ -135,20 +135,20 @@ or, to view the test coverage, execute:
  * pick up required target cloud provider(_AWS_ and _Azure_ are supported) and add corresponding _-recycling_ and _-config_ modules into your project dependencies, e.g.:
  
  
-     <dependency>
-         <groupId>com.tomtom.cloud</groupId>
-         <artifactId>aws-recycling</artifactId>
-         <version>1.0.0</version>
-     </dependency>
-     <dependency>
-         <groupId>com.tomtom.cloud</groupId>
-         <artifactId>aws-config</artifactId>
-         <version>1.0.0</version>
-     </dependency>     
+         <dependency>
+             <groupId>com.tomtom.cloud</groupId>
+             <artifactId>aws-recycling</artifactId>
+             <version>1.0.0</version>
+         </dependency>
+         <dependency>
+             <groupId>com.tomtom.cloud</groupId>
+             <artifactId>aws-config</artifactId>
+             <version>1.0.0</version>
+         </dependency>     
   * when running your app, add _graceful.recycling.CLOUD-PROVIDER.enabled=true_ system property and other required props:
  
  
-     -Dgraceful.recycling.aws.enabled=true -Dgraceful.recycling.aws.shutdownadvised.topicarn=${SHUTDOWN_TOPIC} -Dgraceful.recycling.aws.instance.id=${OWN_INSTANCE_ID}
+         -Dgraceful.recycling.aws.enabled=true -Dgraceful.recycling.aws.shutdownadvised.topicarn=${SHUTDOWN_TOPIC} -Dgraceful.recycling.aws.instance.id=${OWN_INSTANCE_ID}
 ## Organization of Source Code
 
     cloud-healer
