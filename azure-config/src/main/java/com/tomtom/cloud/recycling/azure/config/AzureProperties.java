@@ -17,7 +17,7 @@ package com.tomtom.cloud.recycling.azure.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties("graceful.recycling.azure")
+@ConfigurationProperties("active.recycling.azure")
 public class AzureProperties {
 
     private String metricsInstrumentationKey;

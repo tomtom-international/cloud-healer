@@ -38,7 +38,7 @@ import com.tomtom.cloud.recycling.aws.sns.AwsShutdownAdvisedNotifier;
 /**
  * Configuration class for AWS recycling.
  */
-@ConditionalOnProperty(name="graceful.recycling.aws.enabled", havingValue="true")
+@ConditionalOnProperty(name="active.recycling.aws.enabled", havingValue="true")
 @Configuration
 @EnableConfigurationProperties(AwsProperties.class)
 public class AwsRecyclingAutoConfig {

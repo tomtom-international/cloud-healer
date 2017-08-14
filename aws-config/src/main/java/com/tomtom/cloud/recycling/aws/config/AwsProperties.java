@@ -20,7 +20,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  *
  */
-@ConfigurationProperties("graceful.recycling.aws")
+@ConfigurationProperties("active.recycling.aws")
 public class AwsProperties {
 
     private String namespace;

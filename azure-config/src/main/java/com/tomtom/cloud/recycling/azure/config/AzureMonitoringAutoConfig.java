@@ -45,7 +45,7 @@ import com.tomtom.cloud.recycling.azure.client.AzureRestConfig;
 /**
  * Configuration class for Azure recycling.
  */
-@ConditionalOnProperty(name = "graceful.recycling.azure.enabled", havingValue = "true")
+@ConditionalOnProperty(name = "active.recycling.azure.enabled", havingValue = "true")
 @Configuration
 @EnableConfigurationProperties({AzureProperties.class, AzureCredentials.class})
 public class AzureMonitoringAutoConfig {

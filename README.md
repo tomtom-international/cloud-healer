@@ -6,9 +6,9 @@
 **Copyright (C) 2012-2017, TomTom International BV. All rights reserved.**
 
 ## Introduction
-TomTom VM Self Recycler enables cloud-agnostic self-managed instance recycling for Java. This component was developed to 
+TomTom VM Active Self Recycler enables active cloud-agnostic self-managed instance recycling for Java. This component was developed to 
  address following unique operational requirements:
-  * Your computing instance can inter error state, e.g. connectivity to external resources(process, DB, message queues, e.t.c.) is lost.
+  * Your VM(computing instance) can enter error state, e.g. connectivity to external resources(process, DB, message queues, e.t.c.) is lost.
 The error state can happen unpredictably and can not be scheduled. If you need, for example, self-terminate running instance after certain period of time,
  you can more easily achieve this by leveraging cloud provider facilities, e.g. AWS provides that ability by tuning _cloud-init_ script.
   * Restarting instance most likely solves the issue. It can also include restarting external process if they are co-located. 
@@ -81,10 +81,10 @@ When _Node 3_ is ready(could take up to several minutes) LB adds it to the clust
      EXTERNAL | "Node 1"   |                      | "Node 3"         |      
      RESOURCE | Dependency |                      | Dependency       |
               +------------+                      +------------------+
-## How VM Self Recycler addresses this case
-Instead of taking _passive_ approach, VM Self-Recycler empowers node to function _proctively_, i.e. immidietly
-after expiriencing failure start new nodes(double number of instances) and terminate itself only when new nodes are up and running:
-_Node 2_ loses connectivity to external resource and enters error internal state. VM Self-Recycler start new instance :
+## How VM Actie Self Recycler addresses this case
+Instead of taking _passive_ approach, VM Active Self-Recycler empowers node to function _proctively_, i.e. 
+the moment error condition occurs spin off new nodes(double number of instances) and terminate itself after new nodes are up and running:
+_Node 2_ loses connectivity to external resource and enters error internal state. VM Active Self-Recycler starts new instance :
 
                                +---------------+
      CLIENTS ->                | Load Balancer |
@@ -99,7 +99,7 @@ _Node 2_ loses connectivity to external resource and enters error internal state
      EXTERNAL | "Node 1    |                      | "Node 2"         |         | "Node 3"         |
      RESOURCE | Dependency |                      | Dependency       |         | Dependency       |
               +------------+                      +------------------+         +------------------+
-When _Node 3_ is up and running VM Self-Recycler replaces it LB and triggers _Node 2_ self-termination: 
+When _Node 3_ is up and running VM Active Self-Recycler replaces it in LB and triggers _Node 2_ self-termination: 
 
                                +---------------+
      CLIENTS ->                | Load Balancer |
@@ -130,9 +130,10 @@ or, to view the test coverage, execute:
     mvn clean verify jacoco:report
     open target/site/jacoco/index.html
 ## How to use TT VM Self-Recycler
- * Obtain the code _TT VM Self-Recycler_ code by checking git repo or downloading release version
+ * Obtain the code _TT VM Active Self-Recycler_ code by checking git repo or downloading release version
  * build it(see section above) and 
- * pick up required target cloud provider(_AWS_ and _Azure_ are supported) and add corresponding _-recycling_ and _-config_ modules into your project dependencies, e.g.:
+ * pick up required target cloud provider(_AWS_ and _Azure_ are supported) and add only 2 corresponding _-recycling_ and _-config_ modules into your project dependencies, e.g.:
+ * For AWS add:
  
  
          <dependency>
@@ -144,18 +145,36 @@ or, to view the test coverage, execute:
              <groupId>com.tomtom.cloud</groupId>
              <artifactId>aws-config</artifactId>
              <version>1.0.0</version>
-         </dependency>     
-  * when running your app, add _graceful.recycling.CLOUD-PROVIDER.enabled=true_ system property and other required props:
+         </dependency> 
+ * For Azure add:
  
  
-         -Dgraceful.recycling.aws.enabled=true -Dgraceful.recycling.aws.shutdownadvised.topicarn=${SHUTDOWN_TOPIC} -Dgraceful.recycling.aws.instance.id=${OWN_INSTANCE_ID}
+         <dependency>
+             <groupId>com.tomtom.cloud</groupId>
+             <artifactId>azure-recycling</artifactId>
+             <version>1.0.0</version>
+         </dependency>
+         <dependency>
+             <groupId>com.tomtom.cloud</groupId>
+             <artifactId>azure-config</artifactId>
+             <version>1.0.0</version>
+         </dependency>                
+  * when running your Java app, add _active.recycling.CLOUD-PROVIDER.enabled=true_ system property and other required props:
+  * For AWS add:
+ 
+ 
+         -Dactive.recycling.aws.enabled=true -Dactive.recycling.aws.shutdownadvised.topicarn=${SHUTDOWN_TOPIC} -Dactivel.recycling.aws.instance.id=${OWN_INSTANCE_ID}
+  * For Axure add:
+ 
+ 
+         -Dactive.recycling.azure.enabled=true -Dactive.recycling.azure.gateway"=${AZURE_GATEWAY} -Dactivel.recycling.azure.instance.id=${OWN_INSTANCE_ID}
 ## Organization of Source Code
 
     cloud-healer
     |
     +-- recycling-config-common
     |   |
-    |   +-- RecyclingAutoConfig Autoconfiguration for cloud instance self-recycling
+    |   +-- RecyclingAutoConfig common props(enabling and check timeout) for active cloud instance self-recycling
     |
     +-- recycling-common
     |  |
@@ -166,12 +185,12 @@ or, to view the test coverage, execute:
     +-- azure-recycling            Azure-specific recycling implementation
     |  +-- AzureCloudAdapter       
     |  
-    +-- azure-config              Azure-specific recycling configuration 
+    +-- azure-config              Azure-specific recycling configuration (gateway, eventhub,e.t.c,)
     |  +-- AzureMonitoringAutoConfig       
     |
     +-- aws-recycling              AWS-specific recycling implementation
     |  
-    +-- aws-config                 AWS-specific recycling configuration
+    +-- aws-config                 AWS-specific recycling configuration (topic, instance, e.t.c)
     |  +-- AwsRecyclingAutoConfig       
 # License
 

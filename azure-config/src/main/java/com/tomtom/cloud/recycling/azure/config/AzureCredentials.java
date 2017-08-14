@@ -18,7 +18,7 @@ package com.tomtom.cloud.recycling.azure.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties("graceful.recycling.azure.credentials")
+@ConfigurationProperties("active.recycling.azure.credentials")
 public class AzureCredentials {
 
     private String clientId;
