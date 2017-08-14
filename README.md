@@ -9,10 +9,11 @@
 TomTom VM Self Recycler enables cloud-agnostic self-managed instance recycling for Java. This component was developed to 
  address following unique operational requirements:
   * Your computing instance can inter error state, e.g. connectivity to external resources(process, DB, message queues, e.t.c.) is lost.
-The error state can occure unpredictable and can not be scheduled.
-  * Restarting instance most likely solves the issue
-  * Instance restarting takes substantial amount of time, e.g. several GBs needs to be copied
-  * Load-Balancer(LB) does not support automatic VM recovery(Azure)
+The error state can happen unpredictably and can not be scheduled. If you need, for example, self-terminate running instance after certain period of time,
+ you can more easily achieve this by leveraging cloud provider facilities, e.g. AWS provides that ability by tuning _cloud-init_ script.
+  * Restarting instance most likely solves the issue. It can also include restarting external process if they are co-located. 
+  * Instance restarting takes substantial amount of time, e.g. several GBs needs to be copied.
+  * Load-Balancer(LB) does not support automatic VM recovery(Azure case).
   
 ## Why standard LB can't fix this?
 Relying on LB to detect and recycle instance is _passive_ approach. LB expect predefined number of consecutive health
@@ -114,14 +115,12 @@ When _Node 3_ is up and running VM Self-Recycler replaces it LB and triggers _No
      RESOURCE | Dependency |                      | Dependency       |         | Dependency       |
               +------------+                      +------------------+         +------------------+
 ## Build Environment (Java 8)
-
 The source uses Java JDK 1.8, so make sure your Java compiler is set to 1.8, for example
 using something like (MacOSX):
 
     export JAVA_HOME=`/usr/libexec/java_home -v 1.8`
 
 ## Build
-
 To build the VM self-recycler, simply go to the root folder and then type:
 
     mvn clean install
@@ -130,6 +129,26 @@ or, to view the test coverage, execute:
 
     mvn clean verify jacoco:report
     open target/site/jacoco/index.html
+## How to use TT VM Self-Recycler
+ * Obtain the code _TT VM Self-Recycler_ code by checking git repo or downloading release version
+ * build it(see section above) and 
+ * pick up required target cloud provider(_AWS_ and _Azure_ are supported) and add corresponding _-recycling_ and _-config_ modules into your project dependencies, e.g.:
+ 
+ 
+     <dependency>
+         <groupId>com.tomtom.cloud</groupId>
+         <artifactId>aws-recycling</artifactId>
+         <version>1.0.0</version>
+     </dependency>
+     <dependency>
+         <groupId>com.tomtom.cloud</groupId>
+         <artifactId>aws-config</artifactId>
+         <version>1.0.0</version>
+     </dependency>     
+  * when running your app, add _graceful.recycling.CLOUD-PROVIDER.enabled=true_ system property and other required props:
+ 
+ 
+     -Dgraceful.recycling.aws.enabled=true -Dgraceful.recycling.aws.shutdownadvised.topicarn=${SHUTDOWN_TOPIC} -Dgraceful.recycling.aws.instance.id=${OWN_INSTANCE_ID}
 ## Organization of Source Code
 
     cloud-healer

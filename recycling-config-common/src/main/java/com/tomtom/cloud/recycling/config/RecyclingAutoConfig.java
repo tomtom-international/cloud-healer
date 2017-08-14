@@ -28,15 +28,15 @@ import org.springframework.context.annotation.Configuration;
 /**
  * Autoconfiguration for cloud recycling.
  */
-@ConditionalOnExpression("'${cloud.aws.enabled}'=='true' or '${cloud.azure.enabled}'=='true'")
+@ConditionalOnExpression("'${graceful.recycling.aws.enabled}'=='true' or '${graceful.recycling.azure.enabled}'=='true'")
 @Configuration
 public class RecyclingAutoConfig {
     private static final long DEFAULT_SLEEP_TIME_SECONDS = 60;
 
-    @Value("${cloud.monitoring.sleep:" + DEFAULT_SLEEP_TIME_SECONDS + "}")
+    @Value("${graceful.recycling.sleep:" + DEFAULT_SLEEP_TIME_SECONDS + "}")
     private int sleepIntervalSeconds;
 
-    @Value("${cloud.monitoring.enabled:false}")
+    @Value("${graceful.recycling.enabled:false}")
     private boolean enabled;
 
     @Bean

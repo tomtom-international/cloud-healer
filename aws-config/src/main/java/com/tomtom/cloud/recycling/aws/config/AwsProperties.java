@@ -20,7 +20,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  *
  */
-@ConfigurationProperties("cloud.aws")
+@ConfigurationProperties("graceful.recycling.aws")
 public class AwsProperties {
 
     private String namespace;
