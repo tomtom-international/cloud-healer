@@ -15,7 +15,6 @@
  */
 package com.tomtom.cloud.recycling.aws.config;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.amazonaws.ClientConfiguration;
@@ -26,13 +25,10 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import com.tomtom.cloud.recycling.CloudAdapter;
-import com.tomtom.cloud.recycling.Metric;
-import com.tomtom.cloud.recycling.MetricsPublisher;
-import com.tomtom.cloud.recycling.ShutdownAdvisedNotifier;
+import com.tomtom.cloud.recycling.ShutdownNotifiсationPublisher;
 import com.tomtom.cloud.recycling.aws.AwsAdapter;
 import com.tomtom.cloud.recycling.aws.AwsConstants;
-import com.tomtom.cloud.recycling.aws.cloudwatch.AwsMetricsPublisher;
-import com.tomtom.cloud.recycling.aws.sns.AwsShutdownAdvisedNotifier;
+import com.tomtom.cloud.recycling.aws.sns.AwsShutdownNotifiсationPublisher;
 
 
 /**
@@ -55,17 +51,6 @@ public class AwsRecyclingAutoConfig {
     }
 
     @Bean
-    public MetricsPublisher metricsPublisher(
-            final AwsProperties properties,
-            final List<Metric> metrics,
-            final AmazonCloudWatchClient acwClient) {
-        return new AwsMetricsPublisher(metrics,
-                properties.getNamespace(),
-                properties.getTimeout(),
-                acwClient);
-    }
-
-    @Bean
     public AmazonSNSClient snsClient(final AwsProperties properties) {
         final ClientConfiguration cc = new ClientConfiguration();
         cc.setConnectionTimeout((int) TimeUnit.SECONDS.toMillis(properties.getTimeout()));
@@ -77,9 +62,9 @@ public class AwsRecyclingAutoConfig {
     }
 
     @Bean
-    public ShutdownAdvisedNotifier shutdownAdvisedNotifier(final AwsProperties properties,
-                                                           final AmazonSNSClient snsClient) {
-        return new AwsShutdownAdvisedNotifier(properties.getInstance(), properties.getTopic(), snsClient);
+    public ShutdownNotifiсationPublisher shutdownAdvisedNotifier(final AwsProperties properties,
+                                                                 final AmazonSNSClient snsClient) {
+        return new AwsShutdownNotifiсationPublisher(properties.getInstance(), properties.getTopic(), snsClient);
     }
 
     @Bean

@@ -19,7 +19,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * VM Recycler.
  */
@@ -31,6 +30,8 @@ public class WorkerRecycler {
     private final CloudAdapter cloudAdapter;
 
     private volatile boolean instanceRecycleCalled = false;
+
+    private static final Logger LOG = LoggerFactory.getLogger(WorkerRecycler.class);
 
     public WorkerRecycler(final CloudAdapter cloudAdapter) {
         this.cloudAdapter = cloudAdapter;
@@ -45,6 +46,8 @@ public class WorkerRecycler {
             final WorkerRecyclerThread recycleThread = new WorkerRecyclerThread(cloudAdapter);
             recycleThread.start();
             instanceRecycleCalled = true;
+        } else {
+            LOG.info("instance recycling not triggered because instanceId not provided");
         }
     }
 

@@ -18,7 +18,7 @@ package com.tomtom.cloud.recycling.aws.sns;
 import com.amazonaws.services.sns.AmazonSNSClient;
 import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.services.sns.model.PublishResult;
-import com.tomtom.cloud.recycling.ShutdownAdvisedNotifier;
+import com.tomtom.cloud.recycling.ShutdownNotifiсationPublisher;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,7 +38,7 @@ import static org.junit.Assume.assumeThat;
  *
  */
 @RunWith(MockitoJUnitRunner.class)
-public class AwsShutdownAdvisedNotifierTest {
+public class AwsShutdownNotifiсationPublisherTest {
 
     private static final String INSTANCE_ID = "instanceId";
     private static final String TEST_TOPIC = "testTopic";
@@ -46,15 +46,15 @@ public class AwsShutdownAdvisedNotifierTest {
     @Mock
     private AmazonSNSClient snsClient;
 
-    private ShutdownAdvisedNotifier shutdownAdvisedNotifier;
+    private ShutdownNotifiсationPublisher shutdownNotifiсationPublisher;
 
     @Before
     public void setUp() throws Exception {
-        shutdownAdvisedNotifier = new AwsShutdownAdvisedNotifier(
+        shutdownNotifiсationPublisher = new AwsShutdownNotifiсationPublisher(
                 INSTANCE_ID,
                 TEST_TOPIC,
                 snsClient);
-        assumeThat(shutdownAdvisedNotifier, allOf(
+        assumeThat(shutdownNotifiсationPublisher, allOf(
                 hasProperty("instanceId", equalTo(INSTANCE_ID)),
                 hasProperty("topicName", equalTo(TEST_TOPIC))));
     }
@@ -73,7 +73,7 @@ public class AwsShutdownAdvisedNotifierTest {
         final PublishRequest shutdownAdvisedRequest = new PublishRequest(TEST_TOPIC,
                 shutdownAdvisedMessage, shutdownAdvisedSubject);
         doReturn(publishResult).when(snsClient).publish(shutdownAdvisedRequest);
-        shutdownAdvisedNotifier.publishShutdownAdvisedNotification(reason);
+        shutdownNotifiсationPublisher.publishShutdownNotification(reason);
         verify(snsClient, times(1)).publish(shutdownAdvisedRequest);
     }
 
@@ -86,27 +86,27 @@ public class AwsShutdownAdvisedNotifierTest {
         final PublishRequest shutdownAdvisedRequest = new PublishRequest(TEST_TOPIC,
                 shutdownAdvisedMessage, shutdownAdvisedSubject);
         doThrow(Exception.class).when(snsClient).publish(shutdownAdvisedRequest);
-        shutdownAdvisedNotifier.publishShutdownAdvisedNotification(reason);
+        shutdownNotifiсationPublisher.publishShutdownNotification(reason);
         // no test to do. Simple fact that the exception is not propagated beyond this method is enough.
     }
 
     @Test
     public void shouldHaveZeroInteractionsWithSnsClientNullTopicName() throws Exception {
-        shutdownAdvisedNotifier = new AwsShutdownAdvisedNotifier(
+        shutdownNotifiсationPublisher = new AwsShutdownNotifiсationPublisher(
                 INSTANCE_ID,
                 null,
                 snsClient);
-        shutdownAdvisedNotifier.publishShutdownAdvisedNotification("Error");
+        shutdownNotifiсationPublisher.publishShutdownNotification("Error");
         verifyZeroInteractions(snsClient);
     }
 
     @Test
     public void shouldHaveZeroInteractionsWithSnsClientNullInstanceId() throws Exception {
-        shutdownAdvisedNotifier = new AwsShutdownAdvisedNotifier(
+        shutdownNotifiсationPublisher = new AwsShutdownNotifiсationPublisher(
                 null,
                 TEST_TOPIC,
                 snsClient);
-        shutdownAdvisedNotifier.publishShutdownAdvisedNotification("Error");
+        shutdownNotifiсationPublisher.publishShutdownNotification("Error");
         verifyZeroInteractions(snsClient);
     }
 

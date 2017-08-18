@@ -29,11 +29,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import com.tomtom.cloud.recycling.ShutdownAdvisedNotifier;
+import com.tomtom.cloud.recycling.ShutdownNotifiсationPublisher;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(EventHubClient.class)
-public class AzureShutdownAdvisedNotifierTest {
+public class AzureShutdownNotifiсationPublisherTest {
 
     private static final String TEST_REASON = "reason";
 
@@ -55,29 +55,29 @@ public class AzureShutdownAdvisedNotifierTest {
 
     @Test
     public void shouldPublishShutdownAdvisedNotificationSuccessfully() throws Exception {
-        ShutdownAdvisedNotifier shutdownAdvisedNotifier = new AzureShutdownAdvisedNotifier(TEST_INSTANCE_ID, TEST_TOPIC_NAME, client);
-        shutdownAdvisedNotifier.publishShutdownAdvisedNotification(TEST_REASON);
+        ShutdownNotifiсationPublisher shutdownNotifiсationPublisher = new AzureShutdownNotifiсationPublisher(TEST_INSTANCE_ID, TEST_TOPIC_NAME, client);
+        shutdownNotifiсationPublisher.publishShutdownNotification(TEST_REASON);
         verify(client, times(1)).send(any(EventData.class));
     }
 
     @Test
     public void shouldNotPublishShutdownAdvisedNotificationWhenInstanceIdIsNull() throws Exception {
-        ShutdownAdvisedNotifier shutdownAdvisedNotifier = new AzureShutdownAdvisedNotifier(null, TEST_TOPIC_NAME, client);
-        shutdownAdvisedNotifier.publishShutdownAdvisedNotification(TEST_REASON);
+        ShutdownNotifiсationPublisher shutdownNotifiсationPublisher = new AzureShutdownNotifiсationPublisher(null, TEST_TOPIC_NAME, client);
+        shutdownNotifiсationPublisher.publishShutdownNotification(TEST_REASON);
         verifyZeroInteractions(client);
     }
 
     @Test
     public void shouldNotPublishShutdownAdvisedNotificationWhenTopicNameIsNull() throws Exception {
-        ShutdownAdvisedNotifier shutdownAdvisedNotifier = new AzureShutdownAdvisedNotifier(TEST_INSTANCE_ID, null, client);
-        shutdownAdvisedNotifier.publishShutdownAdvisedNotification(TEST_REASON);
+        ShutdownNotifiсationPublisher shutdownNotifiсationPublisher = new AzureShutdownNotifiсationPublisher(TEST_INSTANCE_ID, null, client);
+        shutdownNotifiсationPublisher.publishShutdownNotification(TEST_REASON);
         verifyZeroInteractions(client);
     }
 
     @Test
     public void shouldNotPublishShutdownAdvisedNotificationWhenClientIsNull() throws Exception {
-        ShutdownAdvisedNotifier shutdownAdvisedNotifier = new AzureShutdownAdvisedNotifier(TEST_INSTANCE_ID, TEST_TOPIC_NAME, null);
-        shutdownAdvisedNotifier.publishShutdownAdvisedNotification(TEST_REASON);
+        ShutdownNotifiсationPublisher shutdownNotifiсationPublisher = new AzureShutdownNotifiсationPublisher(TEST_INSTANCE_ID, TEST_TOPIC_NAME, null);
+        shutdownNotifiсationPublisher.publishShutdownNotification(TEST_REASON);
     }
 
 }

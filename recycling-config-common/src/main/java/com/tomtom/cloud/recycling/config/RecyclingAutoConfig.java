@@ -15,12 +15,11 @@
  */
 package com.tomtom.cloud.recycling.config;
 
+import com.tomtom.cloud.recycling.ActiveVMRecycler;
+import com.tomtom.cloud.recycling.CloudActiveVMRecycler;
 import com.tomtom.cloud.recycling.CloudAdapter;
-import com.tomtom.cloud.recycling.MetricsPublisher;
-import com.tomtom.cloud.recycling.MetricsUpdater;
-import com.tomtom.cloud.recycling.MetricsUpdaterImpl;
+import com.tomtom.cloud.recycling.ShutdownNotifiсationPublisher;
 import com.tomtom.cloud.recycling.WorkerRecycler;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,21 +30,15 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnExpression("'${active.recycling.aws.enabled}'=='true' or '${active.recycling.azure.enabled}'=='true'")
 @Configuration
 public class RecyclingAutoConfig {
-    private static final long DEFAULT_SLEEP_TIME_SECONDS = 60;
-
-    @Value("${active.recycling.sleep:" + DEFAULT_SLEEP_TIME_SECONDS + "}")
-    private int sleepIntervalSeconds;
-
-    @Value("${active.recycling.enabled:false}")
-    private boolean enabled;
-
-    @Bean
-    public MetricsUpdater metricsUpdater(final MetricsPublisher publisher) {
-        return new MetricsUpdaterImpl(publisher, sleepIntervalSeconds, enabled);
-    }
 
     @Bean
     public WorkerRecycler workerRecycler(final CloudAdapter cloudAdapter) {
         return new WorkerRecycler(cloudAdapter);
     }
+
+    @Bean
+    public ActiveVMRecycler activeRecycler(ShutdownNotifiсationPublisher publisher, WorkerRecycler recycler) {
+        return new CloudActiveVMRecycler(publisher, recycler);
+    }
+
 }

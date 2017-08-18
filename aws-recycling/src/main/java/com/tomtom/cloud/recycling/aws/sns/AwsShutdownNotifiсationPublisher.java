@@ -18,7 +18,7 @@ package com.tomtom.cloud.recycling.aws.sns;
 import com.amazonaws.services.sns.AmazonSNSClient;
 import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.services.sns.model.PublishResult;
-import com.tomtom.cloud.recycling.ShutdownAdvisedNotifier;
+import com.tomtom.cloud.recycling.ShutdownNotifiсationPublisher;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,10 +26,10 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
 /**
- * Publishes an SNS notification informing that a Worker needs restart.
+ * Publishes an SNS notification informing that a VM needs restart.
  */
 @ManagedResource("Healer:component=worker,sub=shutdownAdvisedNotifier")
-public class AwsShutdownAdvisedNotifier implements ShutdownAdvisedNotifier {
+public class AwsShutdownNotifiсationPublisher implements ShutdownNotifiсationPublisher {
 
     /**
      * The aws id of the instance running the worker.
@@ -51,7 +51,7 @@ public class AwsShutdownAdvisedNotifier implements ShutdownAdvisedNotifier {
      */
     private final boolean canPublishNotifications;
 
-    private static final Logger LOG = LoggerFactory.getLogger(AwsShutdownAdvisedNotifier.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AwsShutdownNotifiсationPublisher.class);
 
     /**
      * Constructor that should be used during system initialization,
@@ -61,7 +61,7 @@ public class AwsShutdownAdvisedNotifier implements ShutdownAdvisedNotifier {
      * @param topicName topic name
      * @param snsClient sns client instance
      */
-    public AwsShutdownAdvisedNotifier(
+    public AwsShutdownNotifiсationPublisher(
             final String instanceId,
             final String topicName,
             final AmazonSNSClient snsClient) {
@@ -73,11 +73,11 @@ public class AwsShutdownAdvisedNotifier implements ShutdownAdvisedNotifier {
 
 
     @Override
-    public void publishShutdownAdvisedNotification(final String reason) {
+    public void publishShutdownNotification(final String reason) {
         if (canPublishNotifications) {
-            final String shutdownAdvisedSubject = "Worker shutdown advised on " + instanceId;
-            final String shutdownAdvisedMessage = "Worker instance '" + instanceId + "' needs restart: " + reason;
-            final PublishRequest shutdownAdvisedRequest = new PublishRequest(topicName,
+            String shutdownAdvisedSubject = "Worker shutdown advised on " + instanceId;
+            String shutdownAdvisedMessage = "Worker instance '" + instanceId + "' needs restart: " + reason;
+            PublishRequest shutdownAdvisedRequest = new PublishRequest(topicName,
                     shutdownAdvisedMessage, shutdownAdvisedSubject);
             try {
                 final PublishResult publishResult = snsClient.publish(shutdownAdvisedRequest);
@@ -85,6 +85,8 @@ public class AwsShutdownAdvisedNotifier implements ShutdownAdvisedNotifier {
             } catch (Exception cause) {
                 LOG.error("Could not publish notification to Amazon SNS because of: {}", cause.getMessage(), cause);
             }
+        } else {
+            LOG.info("notificaion " + reason + " was not published because topicName or instanceId were not configured");
         }
     }
 

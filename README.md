@@ -158,13 +158,26 @@ or, to view the test coverage, execute:
              <groupId>com.tomtom.cloud</groupId>
              <artifactId>azure-config</artifactId>
              <version>1.0.0</version>
-         </dependency>                
+         </dependency>    
+  * when configuring Spring web app, add two _Spring_ configurations. E.g. for Spring-boot 
+ * For AWS add:
+ 
+ 
+         @SpringBootApplication
+         @ImportAutoConfiguration({RecyclingAutoConfig.class, AwsRecyclingAutoConfig.class})
+
+ * For Azure add:
+ 
+ 
+         @SpringBootApplication
+         @ImportAutoConfiguration({RecyclingAutoConfig.class, AzureRecyclingAutoConfig.class})
+  * Inject _ActiveVMRecycler_ bean into your servive and call _ActiveVMRecycler::recycleMe(String reason)_ method when you need VM recycling
   * when running your Java app, add _active.recycling.CLOUD-PROVIDER.enabled=true_ system property and other required props:
   * For AWS add:
  
  
          -Dactive.recycling.aws.enabled=true -Dactive.recycling.aws.shutdownadvised.topicarn=${SHUTDOWN_TOPIC} -Dactivel.recycling.aws.instance.id=${OWN_INSTANCE_ID}
-  * For Axure add:
+  * For Azure add:
  
  
          -Dactive.recycling.azure.enabled=true -Dactive.recycling.azure.gateway"=${AZURE_GATEWAY} -Dactivel.recycling.azure.instance.id=${OWN_INSTANCE_ID}

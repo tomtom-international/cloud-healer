@@ -19,14 +19,14 @@ package com.tomtom.cloud.recycling;
  * Should be implemented in order to publish
  * shutdown notifications.
  */
-public interface ShutdownAdvisedNotifier {
+public interface ShutdownNotifiсationPublisher {
 
     /**
      * Publish shutdown notification.
      *
      * @param reason shutdown reason
      */
-    void publishShutdownAdvisedNotification(String reason);
+    void publishShutdownNotification(String reason);
 
     /**
      * Return cloud instance id.

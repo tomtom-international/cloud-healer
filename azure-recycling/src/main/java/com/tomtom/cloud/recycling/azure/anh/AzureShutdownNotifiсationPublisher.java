@@ -22,13 +22,13 @@ import com.microsoft.azure.eventhubs.EventHubClient;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
-import com.tomtom.cloud.recycling.ShutdownAdvisedNotifier;
+import com.tomtom.cloud.recycling.ShutdownNotifiсationPublisher;
 
 /**
  * Publish an Azure Notification Hub notification informing that a Worker needs restart.
  */
 @ManagedResource("Healer:component=worker,sub=shutdownAdvisedNotifier")
-public class AzureShutdownAdvisedNotifier implements ShutdownAdvisedNotifier {
+public class AzureShutdownNotifiсationPublisher implements ShutdownNotifiсationPublisher {
 
     private final String instanceId;
 
@@ -44,7 +44,7 @@ public class AzureShutdownAdvisedNotifier implements ShutdownAdvisedNotifier {
      * @param topicName  topic name
      * @param client     event hub client
      */
-    public AzureShutdownAdvisedNotifier(String instanceId, String topicName, EventHubClient client) {
+    public AzureShutdownNotifiсationPublisher(String instanceId, String topicName, EventHubClient client) {
         this.instanceId = instanceId;
         this.topicName = topicName;
         this.client = client;
@@ -52,7 +52,7 @@ public class AzureShutdownAdvisedNotifier implements ShutdownAdvisedNotifier {
 
 
     @Override
-    public void publishShutdownAdvisedNotification(String reason) {
+    public void publishShutdownNotification(String reason) {
         if (canPublishNotifications()) {
             final String shutdownAdvisedSubject = "Worker shutdown advised on " + instanceId;
             final String shutdownAdvisedMessage = "Worker instance '" + instanceId + "' needs restart: " + reason;
