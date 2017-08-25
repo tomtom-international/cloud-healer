@@ -8,17 +8,25 @@
 ## Introduction
 TomTom VM Active Self Recycler enables active cloud-agnostic self-managed instance recycling for Java. This component was developed to 
  address following unique operational requirements:
-  * Your VM(computing instance) can enter error state, e.g. connectivity to external resources(process, DB, message queues, e.t.c.) is lost.
+  * Creating computing instance takes substantial amount of time, e.g. several GBs needs to be copied. 
+  * Your VM(computing instance) can enter unstable state, e.g. connectivity to external resources(process, DB, message queues, e.t.c.) is lost.
 The error state can happen unpredictably and can not be scheduled. If you need, for example, self-terminate running instance after certain period of time,
  you can more easily achieve this by leveraging cloud provider facilities, e.g. AWS provides that ability by tuning _cloud-init_ script.
   * Restarting instance most likely solves the issue. It can also include restarting external process if they are co-located. 
-  * Instance restarting takes substantial amount of time, e.g. several GBs needs to be copied.
   * Load-Balancer(LB) does not support automatic VM recovery(Azure case).
   
-## Why standard LB can't fix this?
-Relying on LB to detect and recycle instance is _passive_ approach. LB expect predefined number of consecutive health
+## TomTom VM Active Self Recycler features
+ * Enables graceful instance recycling without impacting users.
+ * Supports Azure and AWS.
+ * Shields client code from cloud-specific SDK dependencies and low-level details of cloud infrastructure.
+ * Can send notifications to topic(AWS) and EventHub(Azure).
+ * Thread management, forks new thread for recycling.
+ 
+## Why standard LB features are not enough?
+Firstly, unhealthy instance gets removed from the cluster which might cause performance degradation as spinning off fresh instance is slow(see requirements).
+ Relying on LB to detect and recycle instance is _passive_ approach. LB expect predefined number of consecutive health
 check failures for VM to become unhealthy. E.g. By default, Azure LB executes health check every 15 sec, 3 consecutive health
-check must be failed for instance to remove it from LB. Performance degradation could be caused by prompt removal of the instance from the cluster.
+check must be failed for instance to remove it from LB. 
 Following pictures depict how LB handles node failure
 
                                +---------------+
@@ -26,8 +34,8 @@ Following pictures depict how LB handles node failure
                                +---------------+
                                      /  \               
                       +-------------+    +------------------+
-     VM               | "Node1"     |    | "Node2"          |
-     LEVEL            | Status:OK   |    |  Status:OK       |
+     AUTOSCALE        | "Node1"     |    | "Node2"          |
+     GROUP            | Status:OK   |    |  Status:OK       |
                       +-------------+    +------------------+
                       /                               \
               +------------+                      +------------------+      
@@ -35,15 +43,15 @@ Following pictures depict how LB handles node failure
      RESOURCE | Dependency |                      | Dependency       |
               +------------+                      +------------------+
 
-Now _Node 2_ loses connectivity to external resource and enters error internal state:
+Now _Node 2_ loses connectivity to external resource and enters unstable state and becomes unhealthy:
 
                                +---------------+
      CLIENTS ->                | Load Balancer |
                                +---------------+
                                      /  \               
                       +-------------+    +------------------+
-     VM               | "Node 1"    |    | "Node 2"         |
-     LEVEL            | Status:OK   |    |  Status:ERROR    |
+     AUTOSCALE        | "Node 1"    |    | "Node 2"         |
+     GROUP            | Status:OK   |    |  Status:ERROR    |
                       +-------------+    +------------------+
                       /                               
               +------------+                      +------------------+      
@@ -58,8 +66,8 @@ Notice that during that period only _Node 1_ serves all requests which could cau
                                   +---------------+
                                      /                 
                       +-------------+    +------------------+
-     VM               | "Node 1"    |    | "Node 3"         |
-     LEVEL            | Status:OK   |    |  Status:STARTING |
+     AUTOSCALE        | "Node 1"    |    | "Node 3"         |
+     GROUP            | Status:OK   |    |  Status:STARTING |
                       +-------------+    +------------------+
                       /                               
               +------------+                      +------------------+      
@@ -73,27 +81,27 @@ When _Node 3_ is ready(could take up to several minutes) LB adds it to the clust
                                +---------------+
                                      /  \               
                       +-------------+    +------------------+
-     VM               | "Node 1"    |    | "Node 3"         |
-     LEVEL            | Status:OK   |    |  Status:OK       |
+     AUTOSCALE        | "Node 1"    |    | "Node 3"         |
+     GROUP            | Status:OK   |    |  Status:OK       |
                       +-------------+    +------------------+
                       /                               \
               +------------+                      +------------------+      
      EXTERNAL | "Node 1"   |                      | "Node 3"         |      
      RESOURCE | Dependency |                      | Dependency       |
               +------------+                      +------------------+
-## How VM Actie Self Recycler addresses this case
+## How VM Active Self Recycler addresses this case
 Instead of taking _passive_ approach, VM Active Self-Recycler empowers node to function _proctively_, i.e. 
 the moment error condition occurs spin off new nodes(double number of instances) and terminate itself after new nodes are up and running:
 _Node 2_ loses connectivity to external resource and enters error internal state. VM Active Self-Recycler starts new instance :
 
                                +---------------+
-     CLIENTS ->                | Load Balancer |
+     CLIENTS(no degradation)-> | Load Balancer |
                                +---------------+
                                      /  \               
-                      +-------------+    +------------------+               +------------------+  
-     VM               | "Node 1"    |    | "Node 2"         |               | "Node 3:         |
-     LEVEL            | Status:OK   |    |  Status:OK       |---create- ->  | Status:STARTING  |
-                      +-------------+    +------------------+               +------------------+
+                      +-------------+    +---------------------+               +------------------+  
+     AUTOSCALE        | "Node 1"    |    | "Node 2"            |               | "Node 3:         |
+     GROUP            | Status:OK   |    |  Status:OK(UNSTABLE)|---create- ->  | Status:STARTING  |
+                      +-------------+    +---------------------+               +------------------+
                       /                                                              \
               +------------+                      +------------------+         +------------------+ 
      EXTERNAL | "Node 1    |                      | "Node 2"         |         | "Node 3"         |
@@ -106,8 +114,8 @@ When _Node 3_ is up and running VM Active Self-Recycler replaces it in LB and tr
                                +---------------+
                                      /  \               
                       +-------------+    +------------------+               +-------------------+  <---------|
-     VM               | "Node 1"    |    | "Node 3"         |               | "Node 2:          |            |
-     LEVEL            | Status:OK   |    |  Status:OK       |               | Status:TERMINATING|->terminate-|
+     AUTOSCALE        | "Node 1"    |    | "Node 3"         |               | "Node 2:          |            |
+     GROUP            | Status:OK   |    |  Status:OK       |               | Status:TERMINATING|->terminate-|
                       +-------------+    +------------------+               +-------------------+
                       /                              \                                
               +------------+                      +------------------+         +------------------+ 
@@ -171,16 +179,17 @@ or, to view the test coverage, execute:
  
          @SpringBootApplication
          @ImportAutoConfiguration({RecyclingAutoConfig.class, AzureRecyclingAutoConfig.class})
-  * Inject _ActiveVMRecycler_ bean into your servive and call _ActiveVMRecycler::recycleMe(String reason)_ method when you need VM recycling
   * when running your Java app, add _active.recycling.CLOUD-PROVIDER.enabled=true_ system property and other required props:
   * For AWS add:
  
  
-         -Dactive.recycling.aws.enabled=true -Dactive.recycling.aws.shutdownadvised.topicarn=${SHUTDOWN_TOPIC} -Dactivel.recycling.aws.instance.id=${OWN_INSTANCE_ID}
+         -Dactive_recycling_aws_enabled=true -Dactive_recycling_aws_shutdownadvised_topicarn=${SHUTDOWN_TOPIC} -Dactivel_recycling_aws_instance_id=${OWN_INSTANCE_ID}
   * For Azure add:
  
  
-         -Dactive.recycling.azure.enabled=true -Dactive.recycling.azure.gateway"=${AZURE_GATEWAY} -Dactivel.recycling.azure.instance.id=${OWN_INSTANCE_ID}
+         -Dactive_recycling_azure_enabled=true -Dactive_recycling_azure_gateway"=${AZURE_GATEWAY} -Dactive_recycling_azure_instance_id=${OWN_INSTANCE_ID}
+  * Inject _ActiveVMRecycler_ bean into your service and call _ActiveVMRecycler::recycleMe(String reason)_ method when instance becomes unstable
+  * _ActiveVMRecycler::recycleMe(String reason)_ must be called only once.
 ## Organization of Source Code
 
     cloud-healer

@@ -6,6 +6,17 @@ package com.tomtom.cloud.recycling;
  */
 public interface ActiveVMRecycler {
 
+    /**
+     * Sends notification with provided reason, doubles number of instances and recycles current instance.
+     * Everying is performed in separate thread.
+     * @param reason description what is wrong
+     */
     void recycleMe(String reason);
+
+    /**
+     * Used only for demo purpose, not needed for prod.
+     * @return cloud-specific id of the instance the code runs on.
+     */
+    String instanceId();
 
 }

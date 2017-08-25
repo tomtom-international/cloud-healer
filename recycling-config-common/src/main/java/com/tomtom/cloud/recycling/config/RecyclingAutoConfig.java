@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * Autoconfiguration for cloud recycling.
  */
-@ConditionalOnExpression("'${active.recycling.aws.enabled}'=='true' or '${active.recycling.azure.enabled}'=='true'")
+@ConditionalOnExpression("'${active_recycling_aws_enabled}'=='true' or '${active_recycling_azure_enabled}'=='true'")
 @Configuration
 public class RecyclingAutoConfig {
 

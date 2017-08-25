@@ -56,7 +56,7 @@ public class ElbAdapter {
                 unhealthyInstances++;
             }
         }
-        LOG.info("Checking load balancer {} instances health: {} unhealthy instances out of {} total.",
+        LOG.info("Checked load balancer {} instances health: {} unhealthy instances out of {} total.",
             loadBalancerName, unhealthyInstances, totalInstances);
 
         return unhealthyInstances == 0;

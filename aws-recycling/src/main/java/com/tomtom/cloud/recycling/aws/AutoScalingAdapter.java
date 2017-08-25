@@ -15,6 +15,7 @@
  */
 package com.tomtom.cloud.recycling.aws;
 
+import com.amazonaws.services.autoscaling.model.ExecutePolicyResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,10 +60,14 @@ public class AutoScalingAdapter {
             final String scalingPolicyARN = scalingPolicyResult.getPolicyARN();
 
             LOG.info("Doubling the number of instances in the {} scaling group.", scalingGroupName);
-            asClient.executePolicy(new ExecutePolicyRequest().withPolicyName(scalingPolicyARN));
-
-            LOG.info("Removing scaling policy {}.", scalingPolicyName);
-            asClient.deletePolicy(new DeletePolicyRequest().withPolicyName(scalingPolicyARN));
+            ExecutePolicyResult result = asClient.executePolicy(new ExecutePolicyRequest().withPolicyName(scalingPolicyARN));
+            if(result!= null && result.getSdkHttpMetadata() != null) {
+                LOG.info("Doubling finished with Http code {}", result.getSdkHttpMetadata().getHttpStatusCode());
+            } else {
+                LOG.info("Doubling finished with null SdkHttp metadata");
+            }
+//            LOG.info("Removing scaling policy {}.", scalingPolicyName);
+//            asClient.deletePolicy(new DeletePolicyRequest().withPolicyName(scalingPolicyARN));
         } catch (Exception cause) {
             final String message = "Error doubling the number of scaling group instances: " + cause.getMessage();
             throw new MonitoringException(message, cause);

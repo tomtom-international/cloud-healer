@@ -42,7 +42,7 @@ public class WorkerRecycler {
      * (terminated and replaced with a new instance).
      */
     public synchronized void recycle() {
-        if (isValidSetup() && !instanceRecycleCalled) {
+        if (StringUtils.isNotEmpty(instanceId()) && !instanceRecycleCalled) {
             final WorkerRecyclerThread recycleThread = new WorkerRecyclerThread(cloudAdapter);
             recycleThread.start();
             instanceRecycleCalled = true;
@@ -51,8 +51,8 @@ public class WorkerRecycler {
         }
     }
 
-    public boolean isValidSetup() {
-        return StringUtils.isNotEmpty(cloudAdapter.getInstanceId());
+    public String instanceId() {
+        return cloudAdapter.getInstanceId();
     }
 }
 
@@ -68,12 +68,7 @@ final class WorkerRecyclerThread extends Thread {
      * Maximum number of checks that instances that are associated to the same load balancer
      * as the current instance are healthy.
      */
-    private static final int MAX_NUMBER_CHECKS = 60;
-
-    /**
-     * Initial period to wait before checking the instance state of all instances associated to an ELB.
-     */
-    private static final long INITIAL_SLEEP_MILLIS = 240000;
+    private static final int MAX_NUMBER_CHECKS = 20;
 
     /**
      * Period to wait between instances state checks.
@@ -109,9 +104,10 @@ final class WorkerRecyclerThread extends Thread {
 
     private void waitForHealthyInstances() throws MonitoringException {
         try {
-            threadContext.sleep(INITIAL_SLEEP_MILLIS);
+            threadContext.sleep(SLEEP_MILLIS);
 
-            for (int i = 0; i < MAX_NUMBER_CHECKS; i++) {
+            for (int i = 1; i < MAX_NUMBER_CHECKS +1; i++) {
+                LOG.debug("waiting {} time(s) for 1 min. to create an EC2 instance.", i);
                 threadContext.sleep(SLEEP_MILLIS);
 
                 // if any of them are still unhealthy we need to wait

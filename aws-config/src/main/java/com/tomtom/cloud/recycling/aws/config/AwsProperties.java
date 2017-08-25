@@ -15,19 +15,18 @@
  */
 package com.tomtom.cloud.recycling.aws.config;
 
+import com.amazonaws.util.EC2MetadataUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  *
  */
-@ConfigurationProperties("active.recycling.aws")
+@ConfigurationProperties("active_recycling_aws")
 public class AwsProperties {
 
     private String namespace;
 
     private int timeout;
-
-    private String instance;
 
     private String topic;
 
@@ -48,13 +47,8 @@ public class AwsProperties {
     }
 
     public String getInstance() {
-        return instance;
+        return EC2MetadataUtils.getInstanceId();
     }
-
-    public void setInstance(String instance) {
-        this.instance = instance;
-    }
-
     public String getTopic() {
         return topic;
     }

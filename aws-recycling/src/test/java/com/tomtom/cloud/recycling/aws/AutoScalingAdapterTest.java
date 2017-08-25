@@ -67,7 +67,7 @@ public class AutoScalingAdapterTest {
         testedAdapter.doubleGroupSize();
 
         verify(mockASClient).executePolicy(any(ExecutePolicyRequest.class));
-        verify(mockASClient).deletePolicy(any(DeletePolicyRequest.class));
+//        verify(mockASClient).deletePolicy(any(DeletePolicyRequest.class));
     }
 
     @Test(expected = MonitoringException.class)

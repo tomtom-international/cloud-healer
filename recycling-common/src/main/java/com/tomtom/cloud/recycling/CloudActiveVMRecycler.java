@@ -15,4 +15,9 @@ public class CloudActiveVMRecycler implements ActiveVMRecycler {
         notifier.publishShutdownNotification(reason);
         recycler.recycle();
     }
+
+    @Override
+    public String instanceId() {
+        return recycler.instanceId();
+    }
 }

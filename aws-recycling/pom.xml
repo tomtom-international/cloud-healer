@@ -30,7 +30,7 @@
     <name>AWS Recycling</name>
 
     <properties>
-        <awssdk.version>1.10.30</awssdk.version>
+        <awssdk.version>1.11.95</awssdk.version>
     </properties>
     <dependencies>
         <!-- AWS dependencies used for pushing metrics to CloudWatch -->

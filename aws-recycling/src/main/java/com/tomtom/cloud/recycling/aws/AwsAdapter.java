@@ -22,6 +22,9 @@ import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancingClient;
 import com.tomtom.cloud.recycling.CloudAdapter;
 import com.tomtom.cloud.recycling.MonitoringException;
+import com.tomtom.cloud.recycling.WorkerRecycler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
@@ -36,10 +39,13 @@ public class AwsAdapter implements CloudAdapter {
     private AutoScalingAdapter autoScalingAdapter;
     private ElbAdapter elbAdapter;
 
+    private static final Logger LOG = LoggerFactory.getLogger(AwsAdapter.class);
+
     public AwsAdapter(
             final String instanceId,
             final int timeoutSeconds) {
         this.instanceId = instanceId;
+        LOG.info("initializing with instanceId " + instanceId);
         this.timeoutSeconds = timeoutSeconds;
 
         final ClientConfiguration cc = new ClientConfiguration();
