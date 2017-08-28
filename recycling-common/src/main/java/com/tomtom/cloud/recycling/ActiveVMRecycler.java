@@ -10,8 +10,9 @@ public interface ActiveVMRecycler {
      * Sends notification with provided reason, doubles number of instances and recycles current instance.
      * Everying is performed in separate thread.
      * @param reason description what is wrong
+     * @return true if recycling successfully triggered, false otherwise
      */
-    void recycleMe(String reason);
+    boolean recycleMe(String reason);
 
     /**
      * Used only for demo purpose, not needed for prod.

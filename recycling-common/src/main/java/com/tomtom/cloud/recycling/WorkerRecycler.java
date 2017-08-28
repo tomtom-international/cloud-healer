@@ -41,13 +41,15 @@ public class WorkerRecycler {
      * This method is only meant to be called once and to eventually cause the instance to be recycled
      * (terminated and replaced with a new instance).
      */
-    public synchronized void recycle() {
+    public synchronized boolean recycle() {
         if (StringUtils.isNotEmpty(instanceId()) && !instanceRecycleCalled) {
             final WorkerRecyclerThread recycleThread = new WorkerRecyclerThread(cloudAdapter);
             recycleThread.start();
             instanceRecycleCalled = true;
+            return true;
         } else {
-            LOG.info("instance recycling not triggered because instanceId not provided");
+            LOG.info("instance recycling not triggered because instanceId not provided or recycling already in progress");
+            return false;
         }
     }
 

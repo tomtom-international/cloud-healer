@@ -11,9 +11,9 @@ public class CloudActiveVMRecycler implements ActiveVMRecycler {
     }
 
     @Override
-    public void recycleMe(String reason) {
+    public boolean recycleMe(String reason) {
         notifier.publishShutdownNotification(reason);
-        recycler.recycle();
+        return recycler.recycle();
     }
 
     @Override
