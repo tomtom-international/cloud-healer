@@ -75,8 +75,8 @@ public class AwsShutdownNotifiсationPublisher implements ShutdownNotifiсationP
     @Override
     public void publishShutdownNotification(final String reason) {
         if (canPublishNotifications) {
-            String shutdownAdvisedSubject = "Worker shutdown advised on " + instanceId;
-            String shutdownAdvisedMessage = "Worker instance '" + instanceId + "' needs restart: " + reason;
+            String shutdownAdvisedSubject = "VM self-termination triggired on " + instanceId;
+            String shutdownAdvisedMessage = "VM instance '" + instanceId + "' needs to be replaced: " + reason;
             PublishRequest shutdownAdvisedRequest = new PublishRequest(topicName,
                     shutdownAdvisedMessage, shutdownAdvisedSubject);
             try {
@@ -86,11 +86,12 @@ public class AwsShutdownNotifiсationPublisher implements ShutdownNotifiсationP
                 LOG.error("Could not publish notification to Amazon SNS because of: {}", cause.getMessage(), cause);
             }
         } else {
-            LOG.info("notificaion " + reason + " was not published because topicName or instanceId were not configured");
+            LOG.info("notification " + reason + " was not published because topic or instance id were not configured");
         }
     }
 
     private boolean canPublishNotifications() {
+        LOG.info("going to publish notifications to " + topicName);
         return snsClient != null && StringUtils.isNotEmpty(topicName) && StringUtils.isNotEmpty(instanceId);
     }
 

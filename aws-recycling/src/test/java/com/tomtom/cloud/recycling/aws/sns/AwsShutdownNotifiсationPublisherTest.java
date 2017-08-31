@@ -68,8 +68,8 @@ public class AwsShutdownNotifiсationPublisherTest {
     public void shouldPublishShutdownAdvisedNotificationSuccessful() throws Exception {
         PublishResult publishResult = new PublishResult().withMessageId("messageId");
         final String reason = "Out of memory";
-        final String shutdownAdvisedSubject = "Worker shutdown advised on " + INSTANCE_ID;
-        final String shutdownAdvisedMessage = "Worker instance '" + INSTANCE_ID + "' needs restart: " + reason;
+        final String shutdownAdvisedSubject = "VM self-termination triggired on " + INSTANCE_ID;
+        final String shutdownAdvisedMessage = "VM instance '" + INSTANCE_ID + "' needs to be replaced: " + reason;
         final PublishRequest shutdownAdvisedRequest = new PublishRequest(TEST_TOPIC,
                 shutdownAdvisedMessage, shutdownAdvisedSubject);
         doReturn(publishResult).when(snsClient).publish(shutdownAdvisedRequest);
@@ -81,8 +81,8 @@ public class AwsShutdownNotifiсationPublisherTest {
     public void shouldFailDuringPublishing() throws Exception {
         PublishResult publishResult = new PublishResult().withMessageId("messageId");
         final String reason = "Exception";
-        final String shutdownAdvisedSubject = "Worker shutdown advised on " + INSTANCE_ID;
-        final String shutdownAdvisedMessage = "Worker instance '" + INSTANCE_ID + "' needs restart: " + reason;
+        final String shutdownAdvisedSubject = "VM self-termination triggired on " + INSTANCE_ID;
+        final String shutdownAdvisedMessage = "VM instance '" + INSTANCE_ID + "' needs to be replaced: " + reason;
         final PublishRequest shutdownAdvisedRequest = new PublishRequest(TEST_TOPIC,
                 shutdownAdvisedMessage, shutdownAdvisedSubject);
         doThrow(Exception.class).when(snsClient).publish(shutdownAdvisedRequest);

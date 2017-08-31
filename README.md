@@ -183,13 +183,13 @@ or, to view the test coverage, execute:
   * For AWS add:
  
  
-         -Dactive_recycling_aws_enabled=true -Dactive_recycling_aws_shutdownadvised_topicarn=${SHUTDOWN_TOPIC} -Dactivel_recycling_aws_instance_id=${OWN_INSTANCE_ID}
+         -Dactive_recycling_aws_enabled=true -Dactive_recycling_aws_topic=${SHUTDOWN_TOPIC}
   * For Azure add:
  
  
          -Dactive_recycling_azure_enabled=true -Dactive_recycling_azure_gateway"=${AZURE_GATEWAY} -Dactive_recycling_azure_instance_id=${OWN_INSTANCE_ID}
-  * Inject _ActiveVMRecycler_ bean into your service and call _boolean ActiveVMRecycler::recycleMe(String reason)_ method when instance becomes unstable
-  * _boolean ActiveVMRecycler::recycleMe(String reason)_ returns _true_ if it successfully triggered new thread and _false_ if recycling is already in progres.
+  * Inject _ActiveVMRecycler_ bean into your service and call _boolean ActiveVMRecycler::scaleOutAndRecycle(String reason)_ method when instance becomes unstable
+  * _boolean ActiveVMRecycler::scaleOutAndRecycle(String reason)_ returns _true_ if it successfully triggered new thread and _false_ if recycling is already in progress.
 ## Organization of Source Code
 
     cloud-healer

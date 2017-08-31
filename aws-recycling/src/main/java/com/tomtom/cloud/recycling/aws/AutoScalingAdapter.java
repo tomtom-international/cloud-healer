@@ -66,8 +66,8 @@ public class AutoScalingAdapter {
             } else {
                 LOG.info("Doubling finished with null SdkHttp metadata");
             }
-            LOG.info("Removing scaling policy {}.", scalingPolicyName);
-            asClient.deletePolicy(new DeletePolicyRequest().withPolicyName(scalingPolicyARN));
+//            LOG.info("Removing scaling policy {}.", scalingPolicyName);
+//            asClient.deletePolicy(new DeletePolicyRequest().withPolicyName(scalingPolicyARN));
         } catch (Exception cause) {
             final String message = "Error doubling the number of scaling group instances: " + cause.getMessage();
             throw new MonitoringException(message, cause);
