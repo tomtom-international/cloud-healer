@@ -106,8 +106,6 @@ final class WorkerRecyclerThread extends Thread {
 
     private void waitForHealthyInstances() throws MonitoringException {
         try {
-            threadContext.sleep(SLEEP_MILLIS);
-
             for (int i = 1; i < MAX_NUMBER_CHECKS +1; i++) {
                 LOG.debug("waiting {} time(s) for 1 min. to create an EC2 instance.", i);
                 threadContext.sleep(SLEEP_MILLIS);
